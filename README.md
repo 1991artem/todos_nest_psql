@@ -1,1 +1,3 @@
-# pixelplex
+# Artem Puzik
+
+NodeJS PixelPlex
