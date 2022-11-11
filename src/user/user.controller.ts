@@ -1,22 +1,25 @@
-import { Controller, Get, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './entity/user.entity';
 import { UserService } from './user.service';
 
-@Controller('user')
+@ApiTags('Users')
+@Controller('api/v1/users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiOperation({ summary: 'Create user' })
+  @ApiResponse({ status: 201, type: User })
+  @Post()
+  createUser(createUserDto: CreateUserDto) {
+    return this.userService.createUserPost(createUserDto);
+  }
+
+  @ApiOperation({ summary: 'Get user  email' })
+  @ApiResponse({ status: 200, type: [User] })
   @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  findUserByEmail(email: string) {
+    return this.userService.findUserByEmail(email);
   }
 }

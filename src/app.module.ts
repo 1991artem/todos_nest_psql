@@ -1,28 +1,30 @@
 import { Module } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { SequelizeModule } from '@nestjs/sequelize';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { GroupModule } from './group/group.module';
 import { TaskModule } from './task/task.module';
-import { Group, UserGroup } from './group/schema/groupSchema';
-import { Task } from './task/schema/taskSchema';
-import { User } from './user/schema/userSchema';
+import { Group } from './group/entity/group.entity';
+import { Task } from './task/entity/task.entity';
+import { User } from './user/entity/user.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: `.env`,
     }),
-    SequelizeModule.forRoot({
-      dialect: 'postgres',
+    TypeOrmModule.forRoot({
+      type: 'postgres',
       host: process.env.DB_HOST,
       port: Number(process.env.DB_PORT),
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      models: [User, Group, UserGroup, Task],
-      autoLoadModels: true,
+      entities: [User, Group, Task],
+      synchronize: true,
+      logging: false,
     }),
     AuthModule,
     UserModule,
@@ -32,4 +34,7 @@ import { User } from './user/schema/userSchema';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+
+export class AppModule {
+  constructor(private dataSource: DataSource) {}
+}

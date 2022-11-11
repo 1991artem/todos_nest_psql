@@ -1,53 +1,41 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectModel } from '@nestjs/sequelize';
 import { compare, hash } from 'bcryptjs';
-import { User } from '../user/schema/userSchema';
-
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { UserService } from 'src/user/user.service';
+import { User } from '../user/entity/user.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(User) private userTable: typeof User,
+    private userService: UserService,
     private jwtService: JwtService,
   ) {}
 
   async signUpPost(createUserDto: CreateUserDto) {
     const { email, password } = createUserDto;
-    const hashedPassword = await hash(password as string, 12); // hash password
-    const condidate = await this.userTable.findOne({
-      where: { email },
-      include: { all: true },
-    }); // check user in DB
+    const condidate = await this.userService.findUserByEmail(email); // check user in DB
     if (condidate) {
       throw new HttpException(
         'User with this email address already exists',
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
-    const user = await User.create({
+    const hashedPassword = await hash(password as string, 12); // hash password
+    const user = await this.userService.createUserPost({
       ...createUserDto,
       password: hashedPassword,
     }); // create new user
     return user;
   }
+
   async loginPost(createUserDto: CreateUserDto) {
-    const { email, password } = createUserDto;
-    const user = await this.userTable.findOne({
-      where: { email },
-      include: { all: true },
-    }); // check user in DB
-    if (!user) {
-      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
-    }
-    const isMatch: boolean = await compare(password, user?.password);
-    if (!isMatch) {
-      throw new HttpException(
-        'Authentification failed. Check your email/password.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    const user = await this.validateUser(createUserDto);
     const token = this.generateToken(user);
     return token;
   }
@@ -57,5 +45,17 @@ export class AuthService {
     return {
       token: this.jwtService.sign(payload),
     };
+  }
+
+  private async validateUser(createUserDto: CreateUserDto) {
+    const { email, password } = createUserDto;
+    const user = await this.userService.findUserByEmail(email); // check user in DB
+    const passwordEquals: boolean = await compare(password, user?.password);
+    if (user && passwordEquals) {
+      return user;
+    }
+    throw new UnauthorizedException({
+      message: 'Authentification failed. Check your email/password.',
+    });
   }
 }
