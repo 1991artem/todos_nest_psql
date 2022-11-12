@@ -1,34 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto';
-import { UpdateGroupDto } from './dto/update-group.dto';
+import { ApiResponse } from '@nestjs/swagger';
+import { User } from 'src/user/entity/user.entity';
+import { RolesGuard } from 'src/auth/role.guard';
+import { Roles } from 'src/auth/roles.decorator';
+import { USER_ROLE } from 'src/helps/enums';
 
-@Controller('group')
+@Controller('api/v1/group')
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 
-  @Post()
-  create(@Body() createGroupDto: CreateGroupDto) {
-    return this.groupService.create(createGroupDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.groupService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.groupService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto) {
-    return this.groupService.update(+id, updateGroupDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.groupService.remove(+id);
+  @Roles(USER_ROLE.USER)
+  @UseGuards(RolesGuard)
+  @Post('/create')
+  @ApiResponse({ status: 201, type: User })
+  async createGroup(@Body() createGroupDto: CreateGroupDto) {
+    const group = await this.groupService.createGroup(createGroupDto);
+    return {
+      id: group.id,
+      message: 'Group has been created',
+      body: group,
+    };
   }
 }

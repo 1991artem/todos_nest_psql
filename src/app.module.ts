@@ -34,7 +34,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   controllers: [],
   providers: [],
 })
-
 export class AppModule {
   constructor(private dataSource: DataSource) {}
 }

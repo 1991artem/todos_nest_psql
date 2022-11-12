@@ -3,9 +3,10 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { User } from '../user/entity/user.entity';
-import { ConfigModule } from '@nestjs/config';
 import { UserModule } from 'src/user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { GroupModule } from 'src/group/group.module';
+import { ConfigModule } from '@nestjs/config';
 
 const tokenLifetime = '24h';
 
@@ -14,6 +15,7 @@ const tokenLifetime = '24h';
   providers: [AuthService],
   imports: [
     forwardRef(() => UserModule),
+    forwardRef(() => GroupModule),
     ConfigModule.forRoot({
       envFilePath: `.env`,
     }),
@@ -23,5 +25,6 @@ const tokenLifetime = '24h';
       signOptions: { expiresIn: tokenLifetime },
     }),
   ],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
