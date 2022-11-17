@@ -24,3 +24,13 @@ export enum SORT_FIELD {
   DATE = 'date',
   NAME = 'name',
 }
+
+export enum PAGINATIONS {
+  LIMIT = 'limit',
+  OFFSET = 'offset',
+}
+
+export enum SORT {
+  TYPE = 'type',
+  FIELD = 'field',
+}

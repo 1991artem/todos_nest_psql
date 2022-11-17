@@ -2,7 +2,9 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateGroupDto } from './dto/create-group.dto';
+import { ShowParamsDto } from './dto/sort-group.dto';
 import { Group } from './entity/group.entity';
+import { IGroup } from './group.interfaces';
 
 @Injectable()
 export class GroupService {
@@ -31,5 +33,29 @@ export class GroupService {
   async create(createGroupDto: CreateGroupDto) {
     const group = await this._groupsRepository.create(createGroupDto).save();
     return group;
+  }
+
+  async showAllGroups(showParamsDto: ShowParamsDto) {
+    //const { pagination, sort } = showParamsDto;
+    const groupArray = await this.makeShowGroupArray();
+    //const groupArray: IGroup[] = await this._groupsRepository.find();
+    return groupArray;
+  }
+
+  async makeShowGroupArray() {
+    const groupArray: IGroup[] = await this._groupsRepository.find({
+      relations: {
+        users: true,
+      },
+    });
+    return groupArray.map((group: IGroup) => {
+      return {
+        id: group.id,
+        name: group.name,
+        description: group.description,
+        createdAt: group.createdAt,
+        usersAmount: group.users.length,
+      };
+    });
   }
 }
