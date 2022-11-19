@@ -37,15 +37,19 @@ export class Group extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToMany(() => User, (user) => user.groups)
+  @ManyToMany(() => User, {
+    cascade: true,
+  })
   @JoinTable({
     name: 'user_group',
-    joinColumn: {
-      name: 'groupId',
-    },
-    inverseJoinColumn: {
-      name: 'userId',
-    },
+    // joinColumn: {
+    //   name: 'groupId',
+    //   foreignKeyConstraintName: 'fk_group_user',
+    // },
+    // inverseJoinColumn: {
+    //   name: 'userId',
+    //   foreignKeyConstraintName: 'fk_group_group',
+    // },
   })
   users: User[];
 }

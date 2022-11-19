@@ -52,17 +52,19 @@ export class User extends BaseEntity {
   @OneToMany(() => Task, (task) => task.user)
   tasks: Task[];
 
-  @ManyToMany(() => Group, (group) => group.users)
+  @ManyToMany(() => Group, {
+    cascade: false,
+  })
   @JoinTable({
     name: 'user_group',
-    joinColumn: {
-      name: 'userId',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'groupId',
-      referencedColumnName: 'id',
-    },
+    // joinColumn: {
+    //   name: 'userId',
+    //   foreignKeyConstraintName: 'fk_user_group',
+    // },
+    // inverseJoinColumn: {
+    //   name: 'groupId',
+    //   foreignKeyConstraintName: 'fk_user_user',
+    // },
   })
   groups: Group[];
 }

@@ -7,6 +7,7 @@ import { RolesGuard } from 'src/auth/role.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { USER_ROLE } from 'src/helps/enums';
 import { ShowParamsDto } from './dto/sort-group.dto';
+import { UserToGroupDto } from './dto/group-user.dto';
 
 @Controller('api/v1/group')
 export class GroupController {
@@ -35,5 +36,21 @@ export class GroupController {
       amount: groupArray.length,
       groups: groupArray,
     };
+  }
+
+  @Roles(USER_ROLE.USER)
+  @UseGuards(RolesGuard)
+  @Post('/add-user')
+  @ApiResponse({ status: 200, type: User })
+  async addUserToGroup(@Body() addUserToGroupDto: UserToGroupDto) {
+    return await this.groupService.addUserToGroup(addUserToGroupDto);
+  }
+
+  @Roles(USER_ROLE.USER)
+  @UseGuards(RolesGuard)
+  @Post('/remove-user')
+  @ApiResponse({ status: 200, type: User })
+  async removeUserFromGroup(@Body() removeUserFromGroupDTO: UserToGroupDto) {
+    return await this.groupService.removeUserFromGroup(removeUserFromGroupDTO);
   }
 }
